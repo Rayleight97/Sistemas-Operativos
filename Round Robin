@@ -1,0 +1,69 @@
+import java.util.ArrayList; // Importamos la clase ArrayList desde el paquete java.util
+import java.util.List;      // Importamos la clase List desde el paquete java.util
+
+public class RoundRobinSimulation2 {
+
+    public static void main(String[] args) {
+        int quantum = 500; // Definimos una variable llamada "quantum" con valor 500 (medio segundo)
+
+        List<Proceso> procesos = new ArrayList<>(); // Creamos una lista llamada "procesos" para almacenar objetos de la clase Proceso
+        procesos.add(new Proceso(1, 1000)); // Agregamos un objeto de la clase Proceso a la lista con ID 1 y tiempo de ejecución de 1000 ms
+        procesos.add(new Proceso(2, 2000)); // Agregamos otro objeto de la clase Proceso con ID 2 y tiempo de ejecución de 2000 ms
+        procesos.add(new Proceso(3, 1500)); // Agregamos un tercer objeto de la clase Proceso con ID 3 y tiempo de ejecución de 1500 ms
+
+        System.out.println("Simulación Round Robin:"); // Imprimimos un mensaje indicando que comienza la simulación
+
+        while (!procesos.isEmpty()) { // Mientras la lista de procesos no esté vacía
+            Proceso procesoActual = procesos.remove(0); // Tomamos el primer proceso de la lista y lo almacenamos en "procesoActual"
+            procesoActual.ejecutar(quantum); // Llamamos al método "ejecutar" del objeto "procesoActual" con el valor de "quantum"
+
+            if (!procesoActual.isFinalizado()) { // Si el proceso no ha finalizado
+                System.out.println("Proceso " + procesoActual.getId() + " en pausa"); // Imprimimos un mensaje indicando que el proceso está en pausa
+                procesos.add(procesoActual); // Volvemos a agregar el proceso a la lista para ejecutarlo más tarde
+            }
+        }
+
+        System.out.println("Simulación finalizada"); // Imprimimos un mensaje indicando que la simulación ha terminado
+    }
+
+    static class Proceso {
+        private int id;                 // Identificador único del proceso
+        private int tiempoRestante;     // Tiempo restante para que el proceso termine su ejecución
+        private boolean finalizado;     // Indica si el proceso ha finalizado o no
+
+        public Proceso(int id, int rafagaCPU) {
+            this.id = id;                      // Asignamos el ID del proceso
+            this.tiempoRestante = rafagaCPU;   // Establecemos el tiempo restante basado en la ráfaga de CPU
+            this.finalizado = false;           // Inicialmente, el proceso no ha finalizado
+        }
+
+        public int getId() {
+            return id;   // Devuelve el ID del proceso
+        }
+
+        public boolean isFinalizado() {
+            return finalizado;   // Devuelve true si el proceso ha finalizado, de lo contrario, devuelve false
+        }
+
+        public void ejecutar(int quantum) {
+            System.out.println("Proceso " + id + " - Quantum: " + quantum + " ms"); // Imprimimos un mensaje indicando el inicio del proceso
+
+            int tiempoEjecutado = Math.min(tiempoRestante, quantum); // Ejecutamos una parte del proceso, limitado por el valor de "quantum"
+            tiempoRestante -= tiempoEjecutado; // Actualizamos el tiempo restante
+
+            System.out.println("Proceso " + id + " en ejecución - Ráfaga de CPU: " + tiempoEjecutado +
+                    " ms - Tiempo restante: " + tiempoRestante + " ms"); // Imprimimos información sobre la ejecución del proceso
+
+            try {
+                Thread.sleep(tiempoEjecutado); // Simulamos el tiempo que tarda en ejecutarse
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (tiempoRestante <= 0) { // Si el tiempo restante es igual o menor a cero, el proceso ha finalizado
+                System.out.println("Proceso " + id + " finalizado"); // Imprimimos un mensaje indicando que el proceso ha finalizado
+                finalizado = true; // Marcamos el proceso como finalizado
+            }
+        }
+    }
+}
